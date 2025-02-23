@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capturar IP</title>
+</head>
+<body>
+    <h1>Captura de IP</h1>
+    <a href="#" onclick="capturarIP()">Clique aqui para salvar seu IP</a>
+    <p id="resultado"></p>
+
+    <script>
+    function capturarIP() {
+        fetch('https://api64.ipify.org?format=json') // Obtém o IP público do usuário
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("resultado").innerText = "Seu IP: " + data.ip;
+                
+                // Enviar o IP para um Gist no GitHub
+                fetch('https://api.github.com/gists', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'token SEU_GITHUB_TOKEN'
+                    },
+                    body: JSON.stringify({
+                        description: "IP Capturado",
+                        public: false,
+                        files: {
+                            "ips.txt": {
+                                "content": data.ip
+                            }
+                        }
+                    })
+                })
+                .then(response => response.json())
+                .then(data => console.log("IP salvo no Gist:", data.html_url))
+                .catch(error => console.error('Erro ao salvar no GitHub:', error));
+            })
+            .catch(error => console.error('Erro ao obter IP:', error));
+    }
+    </script>
+</body>
+</html>
