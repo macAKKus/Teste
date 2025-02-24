@@ -1,45 +1,45 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>hello!</title>
+    <title>Salvar IP</title>
 </head>
 <body>
-    <h1>Bem vindo(a)</h1>
-    <a href="#" onclick="capturarIP()">Clique aqui para salvar seu IP</a>
-    <p id="resultado"></p>
+    <h1>Salvar o IP do Visitante</h1>
+    <p>Clique no botão abaixo para ver e salvar seu IP:</p>
+    <button onclick="salvarIP()">Salvar meu IP</button>
+    <p id="ip"></p>
 
     <script>
-    function capturarIP() {
-        fetch('https://api64.ipify.org?format=json') // Obtém o IP público do usuário
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("resultado").innerText = "Seu IP: " + data.ip;
-                
-                // Enviar o IP para um Gist no GitHub
-                fetch('https://api.github.com/gists', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'token SEU_GITHUB_TOKEN'
-                    },
-                    body: JSON.stringify({
-                        description: "IP Capturado",
-                        public: false,
-                        files: {
-                            "ips.txt": {
-                                "content": data.ip
-                            }
-                        }
-                    })
-                })
+        function salvarIP() {
+            // Usando a API ipify para obter o IP
+            fetch('https://api.ipify.org?format=json')
                 .then(response => response.json())
-                .then(data => console.log("IP salvo no Gist:", data.html_url))
-                .catch(error => console.error('Erro ao salvar no GitHub:', error));
-            })
-            .catch(error => console.error('Erro ao obter IP:', error));
-    }
+                .then(data => {
+                    // Exibe o IP no parágrafo com id="ip"
+                    document.getElementById('ip').innerText = 'Seu IP é: ' + data.ip;
+
+                    // Envia o IP para o servidor salvar
+                    fetch('salvar_ip.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: 'ip=' + data.ip
+                    })
+                    .then(response => response.text())
+                    .then(result => {
+                        console.log(result); // Exibe resposta do servidor
+                    })
+                    .catch(error => {
+                        console.error('Erro ao salvar IP:', error);
+                    });
+                })
+                .catch(error => {
+                    console.error('Erro ao obter IP:', error);
+                });
+        }
     </script>
 </body>
 </html>
